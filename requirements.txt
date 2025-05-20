@@ -9,4 +9,5 @@ typing_extensions==4.12.2
 filelock==3.13.1
 fsspec==2024.6.1
 jinja2==3.1.4
-networkx==3.3 
+networkx==3.3
+pyserial==3.5 

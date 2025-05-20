@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from module.mouse_capture import MouseCaptureModule
 from module.image_process import ImageProcessModule
 from module.detect import DigitRecognizer
+from module.serial_communication import SerialCommunicationModule
 from datetime import datetime
 
 def create_output_dir():
@@ -44,6 +45,17 @@ def main():
         print(f"数字识别模块加载失败: {str(e)}")
         print("将继续运行但不进行数字识别")
         digit_recognition_enabled = False
+    
+    # 初始化串口通讯模块
+    try:
+        serial_module = SerialCommunicationModule()
+        print("串口通讯模块初始化成功")
+        # 交互式设置串口
+        serial_enabled = serial_module.setup_interactive()
+    except Exception as e:
+        print(f"串口通讯模块初始化失败: {str(e)}")
+        print("将继续运行但不进行串口通讯")
+        serial_enabled = False
     
     try:
         # 启动笔迹捕捉
@@ -107,6 +119,10 @@ def main():
                             result_filename
                         )
                         
+                        # 通过串口发送识别结果
+                        if serial_enabled:
+                            serial_module.send_recognition_result(digit, confidence)
+                            
                     except Exception as e:
                         print(f"数字识别失败: {str(e)}")
                         import traceback
@@ -127,6 +143,9 @@ def main():
     finally:
         # 停止笔迹捕捉
         capture.stop()
+        # 关闭串口连接
+        if 'serial_module' in locals() and serial_enabled:
+            serial_module.close()
         # 关闭所有图像窗口
         plt.close('all')
         print("程序已退出")
